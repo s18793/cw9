@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StackExchange.Redis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -220,7 +221,7 @@ namespace LinqConsoleApp
          && emp.Salary > 1000
                          orderby emp.Ename descending
                          select emp).ToList();
-            
+            //consol.WriteLine()...
 
         }
 
@@ -237,8 +238,16 @@ namespace LinqConsoleApp
         /// </summary>
         public void Przyklad4()
         {
-            var quest = from emp in Emps where emp.Salary == (Emps.Max(emp => emp.Salary) 
-                        );
+            var max = Emps.Max(emp => emp.Salary);
+
+
+            var quest = Emps.Where(emp => emp.Salary == max)
+                 .Select(emp => new
+                 {
+                     emp.Deptno, emp.Empno,
+                     emp.Ename,emp.HireDate,
+                     emp.Job, emp.Mgr, emp.Salary
+                 }).ToList();
         }
 
         /// <summary>
@@ -252,6 +261,8 @@ namespace LinqConsoleApp
                            Nazwisko = emp.Ename,
                            Praca = emp.Job
                        }).ToList();
+
+            //consol.WriteLine()...
         }
 
         /// <summary>
@@ -269,6 +280,7 @@ namespace LinqConsoleApp
                            department = dept.Deptno
 
                        }).ToList();
+            //consol.WriteLine()...
         }
 
         /// <summary>
@@ -284,6 +296,8 @@ namespace LinqConsoleApp
 
                 }).ToList();
 
+            //consol.WriteLine()...
+
         }
 
         /// <summary>
@@ -293,6 +307,7 @@ namespace LinqConsoleApp
         public void Przyklad8()
         {
             var quest = (from emp in Emps where emp.Job == "backend programmer" select emp).Any().ToString();
+            //consol.WriteLine()...
         }
 
         /// <summary>
@@ -302,6 +317,7 @@ namespace LinqConsoleApp
         public void Przyklad9()
         {
             var quest = (from emp in Emps where emp.Job == "fronted programmer" orderby emp.HireDate descending select emp.Ename);
+            //consol.WriteLine()...
         }
 
         /// <summary>
@@ -312,21 +328,43 @@ namespace LinqConsoleApp
         public void Przyklad10Button_Click()
         {
 
-            var quest= (from emp in Emps )
+            var quest1 = Emps.Select(emp => new
+            {
+                Ename = emp.Ename,
+                Job = emp.Job,
+                HireDate = emp.HireDate
+            });
+
+            var quest2 = Emps.Select(emp => new
+            {
+                Ename = "Brak wartości",
+                Job = "null",
+                HireDate = (DateTime?)null
+            });
+
+            var union = quest1.Union(quest2).ToList();
+
+            //consol.WriteLine()...
 
         }
 
         //Znajdź pracownika z najwyższą pensją wykorzystując metodę Aggregate()
         public void Przyklad11()
         {
+            var quest = Emps.Aggregate((res, next) => new Emp { 
+                Salary = res.Salary > next.Salary ? res.Salary : next.Salary 
+            });
 
+            //consol.WriteLine()...
         }
 
         //Z pomocą języka LINQ i metody SelectMany wykonaj złączenie
         //typu CROSS JOIN
         public void Przyklad12()
         {
-
+            var quest = Emps.SelectMany(emp =>
+                          Depts.Select(dept => Tuple.Create(emp, dept)).ToList());
+            //consol.WriteLine()...
         }
     }
 }
